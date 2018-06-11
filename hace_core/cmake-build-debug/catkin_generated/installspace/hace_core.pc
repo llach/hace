@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: hace_core
-Description: Description of hace_core
-Version: 0.0.0
-Cflags: 
-Libs: -L/usr/local/lib 
-Requires: 
