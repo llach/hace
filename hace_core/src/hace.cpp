@@ -9,6 +9,10 @@
 // takes care of ros output
 #include "RosWorkerOutput.h"
 
+#include "RosDepthInput.h"
+#include "RosDepthOutput.h"
+#include "DepthDatum.h"
+
 // program flags are out-sourced for readability
 #include "flag_defines.cpp"
 
@@ -20,11 +24,14 @@ int main (int argc, char** argv){
     ros::AsyncSpinner spinner(0);
     spinner.start();
 
-    std::string rgb_topic, depth_topic, output_topic;
+    std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic;
 
-    n.param("rgb_topic", rgb_topic, std::string("/image_raw"));
+    n.param("rgb_topic", rgb_topic, std::string("/camera/rgb/image_raw"));
+    n.param("rgb_info_topic", rgb_info_topic, std::string("/camera/rgb/camera_info"));
     n.param("depth_topic", depth_topic, std::string("/camera/depth_registered/image_raw"));
     n.param("output_topic", output_topic, std::string("/hace/image"));
+    n.param("people_topic", people_topic, std::string("/hace/people"));
+    n.param("marker_topic", marker_topic, std::string("/hace/marker"));
 
     // logging_level
     op::check(0 <= FLAGS_logging_level && FLAGS_logging_level <= 255, "Wrong logging_level value.",
@@ -37,10 +44,6 @@ int main (int argc, char** argv){
     const auto outputSize = op::flagsToPoint(FLAGS_output_resolution, "-1x-1");
     // netInputSize
     const auto netInputSize = op::flagsToPoint(FLAGS_net_resolution, "-1x368");
-
-    // create ros producer
-    std::shared_ptr<op::Producer> producer_ptr;
-    producer_ptr.reset(new op::RosImageProducer(rgb_topic));
 
     // poseModel
     const auto poseModel = op::flagsToPoseModel(FLAGS_model_pose);
@@ -64,7 +67,7 @@ int main (int argc, char** argv){
 
     // OpenPose wrapper
     op::log("Configuring OpenPose wrapper...", op::Priority::Low, __LINE__, __FUNCTION__, __FILE__);
-    op::Wrapper<std::vector<op::Datum>> opWrapper;
+    op::Wrapper<std::vector<op::DepthDatum>> opWrapper;
     // Pose configuration (use WrapperStructPose{} for default and recommended configuration)
     const op::WrapperStructPose wrapperStructPose{!FLAGS_body_disable, netInputSize, outputSize, keypointScale,
                                                   FLAGS_num_gpu, FLAGS_num_gpu_start, FLAGS_scale_number,
@@ -77,24 +80,18 @@ int main (int argc, char** argv){
                                                   enableGoogleLogging, FLAGS_3d, FLAGS_3d_min_views,
                                                   FLAGS_identification, FLAGS_tracking};
 
-    // Producer (use default to disable any input)
-    const op::WrapperStructInput wrapperStructInput{producer_ptr, FLAGS_frame_first, FLAGS_frame_last,
-                                                    FLAGS_process_real_time, FLAGS_frame_flip, FLAGS_frame_rotate,
-                                                    FLAGS_frames_repeat};
+    // Initializing the user custom classes
+    // Frames producer (e.g. video, webcam, ...)
+    auto rosInput = std::make_shared<op::RosDepthInput>();
+    rosInput->init(rgb_topic, depth_topic);
 
-    // Consumer (comment or use default argument to disable any output)
-    const op::WrapperStructOutput wrapperStructOutput{op::DisplayMode::NoDisplay,
-                                                      !FLAGS_no_gui_verbose, FLAGS_fullscreen, FLAGS_write_keypoint,
-                                                      op::stringToDataFormat(FLAGS_write_keypoint_format),
-                                                      writeJson, FLAGS_write_coco_json,
-                                                      FLAGS_write_images, FLAGS_write_images_format, FLAGS_write_video,
-                                                      FLAGS_camera_fps, FLAGS_write_heatmaps,
-                                                      FLAGS_write_heatmaps_format, FLAGS_write_coco_foot_json};
-
+    // Add custom processing
+    const auto workerInputOnNewThread = true;
+    opWrapper.setWorkerInput(rosInput, workerInputOnNewThread);
 
     // Initializing ros output
-    auto rosOutput = std::make_shared<op::RosWorkerOutput>();
-    rosOutput->init(output_topic);
+    auto rosOutput = std::make_shared<op::RosDepthOutput>();
+    rosOutput->init(output_topic, people_topic, marker_topic, rgb_info_topic);
 
     // Add custom processing
     const auto workerOutputOnNewThread = true;
@@ -102,8 +99,8 @@ int main (int argc, char** argv){
 
 
     // Configure wrapper
-    opWrapper.configure(wrapperStructPose, op::WrapperStructFace{}, op::WrapperStructHand{}, wrapperStructInput,
-                         wrapperStructOutput);
+    opWrapper.configure(wrapperStructPose, op::WrapperStructFace{}, op::WrapperStructHand{}, op::WrapperStructInput{},
+                        op::WrapperStructOutput{});
 
 
     op::log("Starting thread(s)...", op::Priority::High);

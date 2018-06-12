@@ -9,7 +9,7 @@
 namespace op
 {
 
-    class RosWorkerOutput : public op::WorkerConsumer<std::shared_ptr<std::vector<op::Datum>>>
+class RosWorkerOutput : public op::WorkerConsumer<std::shared_ptr<std::vector<op::Datum>>>
     {
     public:
 
