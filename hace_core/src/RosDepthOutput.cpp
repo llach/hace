@@ -39,7 +39,8 @@ namespace op {
                 const auto& datum = datumsPtr->at(0);
                 cv::Mat depth_image = datum.depth_image_;
 
-                visual_tools_->deleteAllMarkers();
+                if(sent_humans_) visual_tools_->deleteAllMarkers();
+                sent_humans_ = false;
 
                 // create humans and marker
                 hace_msgs::MinimalHumans humans;
@@ -64,24 +65,29 @@ namespace op {
                     human.rhand.header.frame_id = camera_frame_;
                     keypointToPose(human.rhand.pose, poseKeypoints, depth_image, person, 4);
 
-                    if(!std::isnan(human.face.pose.position.x) && !std::isnan(human.face.pose.position.y) && !std::isnan(human.face.pose.position.z)){
+                    if(!checkPoseNan(human.face.pose)){
                         visual_tools_->publishSphere(human.face.pose, rviz_visual_tools::WHITE, rviz_visual_tools::scales::XXLARGE);
                     }
 
-                    if(!std::isnan(human.lhand.pose.position.x) && !std::isnan(human.lhand.pose.position.y) && !std::isnan(human.lhand.pose.position.z)){
+                    if(!checkPoseNan(human.lhand.pose)){
                         visual_tools_->publishSphere(human.lhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
                     }
 
-                    if(!std::isnan(human.rhand.pose.position.x) && !std::isnan(human.rhand.pose.position.y) && !std::isnan(human.rhand.pose.position.z)){
+                    if(!checkPoseNan(human.rhand.pose)){
                         visual_tools_->publishSphere(human.rhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
                     }
 
-                    humans.humans.push_back(human);
+                    if(!checkHumanNan(human)) humans.humans.push_back(human);
+
                 }
 
                 previous_humans_ = humans;
 
-                if(!humans.humans.empty()) people_pub_.publish(humans);
+                if(!humans.humans.empty()) {
+                    sent_humans_ = true;
+                    people_pub_.publish(humans);
+                }
+
                 visual_tools_->trigger();
 
 
@@ -101,6 +107,14 @@ namespace op {
             this->stop();
             op::error(e.what(), __LINE__, __FUNCTION__, __FILE__);
         }
+    }
+
+    bool RosDepthOutput::checkHumanNan(const hace_msgs::MinimalHuman& human){
+        return checkPoseNan(human.face.pose) && checkPoseNan(human.lhand.pose) && checkPoseNan(human.rhand.pose);
+    }
+
+    bool RosDepthOutput::checkPoseNan(const geometry_msgs::Pose& pose){
+        return std::isnan(pose.position.x) || std::isnan(pose.position.y) || std::isnan(pose.position.z);
     }
 
     float RosDepthOutput::getValueAroundPoint(cv::Mat image, int x, int y, int radius){
