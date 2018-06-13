@@ -10,6 +10,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
         image_geometry
+        moveit_visual_tools
         visualization_msgs
         sensor_msgs
         hace_msgs

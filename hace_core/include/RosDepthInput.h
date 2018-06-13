@@ -6,7 +6,6 @@
 
 #include "DepthDatum.h"
 #include "cv_convert.h"
-#include "../../../../../../../usr/include/boost/shared_ptr.hpp"
 
 namespace op
 {

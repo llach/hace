@@ -2,6 +2,7 @@
 #include "sensor_msgs/Image.h"
 #include "image_geometry/pinhole_camera_model.h"
 #include "visualization_msgs/MarkerArray.h"
+#include <rviz_visual_tools/rviz_visual_tools.h>
 
 // OpenPose dependencies
 #include <openpose/headers.hpp>
@@ -20,7 +21,7 @@ namespace op
         void init(const std::string& output_topic,
                   const std::string& people_topic,
                   const std::string& marker_topic,
-                  const std::string& camera_info_topic);
+                  const std::string& camera_info_topic, float min_depth = 0.6);
 
         void initializationOnThread();
 
@@ -28,7 +29,6 @@ namespace op
 
     private:
 
-        std::vector<visualization_msgs::Marker> produceHumanMarker(int pind, hace_msgs::MinimalHuman& human);
         float getValueAroundPoint(cv::Mat image, int x, int y, int radius = 1);
         void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr camera_info);
         void keypointToPose(geometry_msgs::Pose& pose, const op::Array<float>& keypoints,
@@ -45,10 +45,16 @@ namespace op
         std::string camera_info_topic_;
 
         int marker_count_;
+        float min_depth_;
 
         std::string camera_frame_;
         std::atomic<bool> got_camera_info_;
         image_geometry::PinholeCameraModel camera_model_;
 
+        hace_msgs::MinimalHumans previous_humans_;
+        visualization_msgs::MarkerArray previous_human_marker_;
+
+        // For visualizing things in rviz
+        rviz_visual_tools::RvizVisualToolsPtr visual_tools_;
 };
 }

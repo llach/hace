@@ -71,8 +71,6 @@ namespace op {
             // Get frame
             cv::Mat cvMat = cv_convert::matFromImage(*image);
 
-            // maybe convert?
-
             // Move to buffer
             if (!cvMat.empty())
             {

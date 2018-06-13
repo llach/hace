@@ -95,7 +95,8 @@ namespace cv_convert {
         if ((boost::endian::order::native == boost::endian::order::big && source.is_bigendian) ||
             (boost::endian::order::native == boost::endian::order::little && !source.is_bigendian) ||
             byte_depth == 1)
-            return mat;
+                return mat.clone();
+
 
         // Otherwise, reinterpret the data as bytes and switch the channels accordingly
         mat = cv::Mat(source.height, source.width, CV_MAKETYPE(CV_8U, num_channels*byte_depth),
@@ -115,7 +116,7 @@ namespace cv_convert {
         // Interpret mat_swap back as the proper type
         mat_swap.reshape(num_channels);
 
-        return mat_swap;
+        return mat_swap.clone();
     }
 
     sensor_msgs::Image imageFromMat(cv::Mat image){

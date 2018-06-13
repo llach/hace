@@ -21,7 +21,7 @@ int main (int argc, char** argv){
     ros::init(argc, argv, "hace");
     ros::NodeHandle n("~");
 
-    ros::AsyncSpinner spinner(0);
+    ros::AsyncSpinner spinner(4);
     spinner.start();
 
     std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic;
