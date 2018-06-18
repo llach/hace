@@ -55,13 +55,16 @@ add_executable(${PROJECT_NAME} src/hace.cpp
         include/RosDepthInput.h
         include/RosDepthOutput.h
         include/DepthDatum.h
+        include/HumanProcessor.h
 
 
         src/cv_convert.cpp
         src/RosWorkerOutput.cpp
         src/RosDepthInput.cpp
         src/RosDepthOutput.cpp
-        src/RosImageProducer.cpp)
+        src/RosImageProducer.cpp
+        src/HumanProcessor.cpp
+        )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}

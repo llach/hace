@@ -40,6 +40,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    MinimalHuman.msg
    MinimalHumans.msg
+   HaceDebug.msg
  )
 # Generate added messages and services with any dependencies listed here
  generate_messages(

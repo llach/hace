@@ -12,6 +12,7 @@
 #include "RosDepthInput.h"
 #include "RosDepthOutput.h"
 #include "DepthDatum.h"
+#include "HumanProcessor.h"
 
 // program flags are out-sourced for readability
 #include "flag_defines.cpp"
@@ -89,9 +90,15 @@ int main (int argc, char** argv){
     const auto workerInputOnNewThread = true;
     opWrapper.setWorkerInput(rosInput, workerInputOnNewThread);
 
+    // Output Processor
+//    op::HumanProcessor hp(output_topic, people_topic, marker_topic, rgb_info_topic);
+    std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic);
+    hp->setDebug();
+
     // Initializing ros output
     auto rosOutput = std::make_shared<op::RosDepthOutput>();
-    rosOutput->init(output_topic, people_topic, marker_topic, rgb_info_topic);
+    rosOutput->init(hp);
+
 
     // Add custom processing
     const auto workerOutputOnNewThread = true;
