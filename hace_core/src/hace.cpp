@@ -27,9 +27,9 @@ int main (int argc, char** argv){
 
     std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic;
 
-    n.param("rgb_topic", rgb_topic, std::string("/camera/rgb/image_raw"));
-    n.param("rgb_info_topic", rgb_info_topic, std::string("/camera/rgb/camera_info"));
-    n.param("depth_topic", depth_topic, std::string("/camera/depth_registered/image_raw"));
+    n.param("rgb_topic", rgb_topic, std::string("/people_camera/rgb/image_raw"));
+    n.param("rgb_info_topic", rgb_info_topic, std::string("/people_camera/rgb/camera_info"));
+    n.param("depth_topic", depth_topic, std::string("/people_camera/depth_registered/hw_registered/image_rect"));
     n.param("output_topic", output_topic, std::string("/hace/image"));
     n.param("people_topic", people_topic, std::string("/hace/people"));
     n.param("marker_topic", marker_topic, std::string("/hace/marker"));
@@ -91,7 +91,6 @@ int main (int argc, char** argv){
     opWrapper.setWorkerInput(rosInput, workerInputOnNewThread);
 
     // Output Processor
-//    op::HumanProcessor hp(output_topic, people_topic, marker_topic, rgb_info_topic);
     std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic);
     hp->setDebug();
 
