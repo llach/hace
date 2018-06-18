@@ -38,6 +38,8 @@ namespace op
 
     private:
 
+        cv::Point2d com(const op::Array<float>& keypoints, int pind);
+        cv::Point2d com(const op::Array<float>& keypoints, std::vector<int> kp_ids);
         cv::Point2d getHighestPoint(const op::Array<float>& keypoints, int pind);
         void removeOutlier(std::vector<float>& v, float& mean);
         bool checkHumanNan(const hace_msgs::MinimalHuman& human);
@@ -47,6 +49,9 @@ namespace op
         float distHuman(Array<float> l1, Array<float> l2, int p1, int p2);
         void keypointToPose(geometry_msgs::Pose& pose, const op::Array<float>& keypoints,
                             cv::Mat& depth_image, int pind, int kind);
+
+        void keypointsToPose(geometry_msgs::Pose& pose, const op::Array<float>& keypoints,
+                            cv::Mat& depth_image, int pind, std::vector<int> kp_ids);
 
         ros::Publisher image_pub_;
         ros::Publisher people_pub_;

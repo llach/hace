@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
         )
 
 ## System dependencies are found with CMake's conventions
-find_package(OpenCV 2)
+find_package(OpenCV)
 find_package(OpenPose REQUIRED)
 find_package(Caffe REQUIRED)
 

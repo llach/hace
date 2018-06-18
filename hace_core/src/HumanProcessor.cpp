@@ -52,28 +52,29 @@ namespace op {
             human.uuid = uuids[person];
 
             human.face.header.frame_id = camera_frame_;
-            keypointToPose(human.face.pose, keypoints, depth_image, person, 0);
+            keypointToPose(human.face.pose, keypoints, depth_image, person, 1);
 
-            human.lhand.header.frame_id = camera_frame_;
-            keypointToPose(human.lhand.pose, keypoints, depth_image, person, 7);
-
-            human.rhand.header.frame_id = camera_frame_;
-            keypointToPose(human.rhand.pose, keypoints, depth_image, person, 4);
+//            human.lhand.header.frame_id = camera_frame_;
+//            keypointToPose(human.lhand.pose, keypoints, depth_image, person, 7);
+//
+//            human.rhand.header.frame_id = camera_frame_;
+//            keypointToPose(human.rhand.pose, keypoints, depth_image, person, 4);
 
             if(!checkPoseNan(human.face.pose)){
-                visual_tools_->publishSphere(human.face.pose, rviz_visual_tools::WHITE, rviz_visual_tools::scales::XXLARGE);
+                std::cout << "got face" << std::endl;
+                visual_tools_->publishSphere(human.face.pose, rviz_visual_tools::RED, rviz_visual_tools::scales::XXXLARGE);
                 marker_count++;
             }
 
-            if(!checkPoseNan(human.lhand.pose)){
-                visual_tools_->publishSphere(human.lhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
-                marker_count++;
-            }
-
-            if(!checkPoseNan(human.rhand.pose)){
-                visual_tools_->publishSphere(human.rhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
-                marker_count++;
-            }
+//            if(!checkPoseNan(human.lhand.pose)){
+//                visual_tools_->publishSphere(human.lhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
+//                marker_count++;
+//            }
+//
+//            if(!checkPoseNan(human.rhand.pose)){
+//                visual_tools_->publishSphere(human.rhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
+//                marker_count++;
+//            }
 
             if(!checkHumanNan(human)) humans.humans.push_back(human);
 
@@ -141,6 +142,12 @@ namespace op {
                     }
                 }
 
+                if (min_dist == std::numeric_limits<float>::infinity()) {
+                    new_ids.push_back(std::to_string(id_counter_));
+                    id_counter_++;
+                    continue;
+                }
+
                 bool found_min = true;
 
                 for(int k = 0; k < keypoints.getSize(0); k++){
@@ -165,16 +172,18 @@ namespace op {
             }
         }
 
-        
-        for (int i = 0; i < prev_keypoints_.getSize(0); i++){
-            std::cout << "| ";
-            for (int j = 0; j < keypoints.getSize(0); j++){
-                std::cout << dist_mat[i][j] << " ";
-            }
-            std::cout << "|" << std::endl;
-        }
+        if(superdebug_){
 
-        std::cout << std::endl;
+            for (int i = 0; i < prev_keypoints_.getSize(0); i++){
+                std::cout << "| ";
+                for (int j = 0; j < keypoints.getSize(0); j++){
+                    std::cout << dist_mat[i][j] << " ";
+                }
+                std::cout << "|" << std::endl;
+            }
+
+            std::cout << std::endl;
+        }
 
         // store new data
         prev_keypoints_ = keypoints;
@@ -302,6 +311,7 @@ namespace op {
         float z = getValueAroundPoint(depth_image, pixel_x, pixel_y);
 
         if(pixel_x == 0.0 || pixel_y == 0.0 || std::isnan(z)){
+            std::cout << "oh no" << std::endl;
             pose.position.x = std::numeric_limits<float>::quiet_NaN();
             pose.position.y = std::numeric_limits<float>::quiet_NaN();
             pose.position.z = std::numeric_limits<float>::quiet_NaN();
@@ -311,6 +321,34 @@ namespace op {
 
             pose.position.x = kpoint3d.x;
             pose.position.y = kpoint3d.y;
+            pose.position.z = z;
+
+            std::cout << "oh YES" << std::endl;
+            pose.orientation.w = 1.0;
+        }
+
+    }
+
+    cv::Point2d HumanProcessor::com(const op::Array<float> &keypoints, std::vector<int> kp_ids) {
+
+    }
+
+    void HumanProcessor::keypointsToPose(geometry_msgs::Pose &pose, const op::Array<float> &keypoints,
+                                         cv::Mat &depth_image, int pind, std::vector<int> kp_ids){
+
+        auto p = com(keypoints, kp_ids);
+
+        float z = getValueAroundPoint(depth_image, p.x, p.y);
+
+        if(p.x == 0.0 || p.y == 0.0 || std::isnan(z)){
+            pose.position.x = std::numeric_limits<float>::quiet_NaN();
+            pose.position.y = std::numeric_limits<float>::quiet_NaN();
+            pose.position.z = std::numeric_limits<float>::quiet_NaN();
+        } else {
+            cv::Point3d kpoint3d = camera_model_.projectPixelTo3dRay(camera_model_.rectifyPoint(p));
+
+            pose.position.x = p.x;
+            pose.position.y = p.y;
             pose.position.z = z;
 
             pose.orientation.w = 1.0;
