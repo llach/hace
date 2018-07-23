@@ -25,7 +25,7 @@ int main (int argc, char** argv){
     ros::AsyncSpinner spinner(4);
     spinner.start();
 
-    std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic;
+    std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic, models;
 
     n.param("rgb_topic", rgb_topic, std::string("/people_camera/rgb/image_raw"));
     n.param("rgb_info_topic", rgb_info_topic, std::string("/people_camera/rgb/camera_info"));
@@ -33,6 +33,7 @@ int main (int argc, char** argv){
     n.param("output_topic", output_topic, std::string("/hace/image"));
     n.param("people_topic", people_topic, std::string("/hace/people"));
     n.param("marker_topic", marker_topic, std::string("/hace/marker"));
+    n.param("models", models, std::string("./models/"));
 
     // logging_level
     op::check(0 <= FLAGS_logging_level && FLAGS_logging_level <= 255, "Wrong logging_level value.",
@@ -74,7 +75,7 @@ int main (int argc, char** argv){
         !FLAGS_body_disable, netInputSize, outputSize, keypointScale, FLAGS_num_gpu, FLAGS_num_gpu_start,
         FLAGS_scale_number, (float)FLAGS_scale_gap, op::flagsToRenderMode(FLAGS_render_pose, multipleView),
         poseModel, !FLAGS_disable_blending, (float)FLAGS_alpha_pose, (float)FLAGS_alpha_heatmap,
-        FLAGS_part_to_show, FLAGS_model_folder, heatMapTypes, heatMapScale, FLAGS_part_candidates,
+        FLAGS_part_to_show, models, heatMapTypes, heatMapScale, FLAGS_part_candidates,
         (float)FLAGS_render_threshold, FLAGS_number_people_max, enableGoogleLogging};
 
     // Initializing the user custom classes
