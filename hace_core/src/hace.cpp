@@ -70,16 +70,12 @@ int main (int argc, char** argv){
     op::log("Configuring OpenPose wrapper...", op::Priority::Low, __LINE__, __FUNCTION__, __FILE__);
     op::Wrapper<std::vector<op::DepthDatum>> opWrapper;
     // Pose configuration (use WrapperStructPose{} for default and recommended configuration)
-    const op::WrapperStructPose wrapperStructPose{!FLAGS_body_disable, netInputSize, outputSize, keypointScale,
-                                                  FLAGS_num_gpu, FLAGS_num_gpu_start, FLAGS_scale_number,
-                                                  (float)FLAGS_scale_gap,
-                                                  op::flagsToRenderMode(FLAGS_render_pose, multipleView),
-                                                  poseModel, !FLAGS_disable_blending, (float)FLAGS_alpha_pose,
-                                                  (float)FLAGS_alpha_heatmap, FLAGS_part_to_show, FLAGS_model_folder,
-                                                  heatMapTypes, heatMapScale, FLAGS_part_candidates,
-                                                  (float)FLAGS_render_threshold, FLAGS_number_people_max,
-                                                  enableGoogleLogging, FLAGS_3d, FLAGS_3d_min_views,
-                                                  FLAGS_identification, FLAGS_tracking};
+    const op::WrapperStructPose wrapperStructPose{
+        !FLAGS_body_disable, netInputSize, outputSize, keypointScale, FLAGS_num_gpu, FLAGS_num_gpu_start,
+        FLAGS_scale_number, (float)FLAGS_scale_gap, op::flagsToRenderMode(FLAGS_render_pose, multipleView),
+        poseModel, !FLAGS_disable_blending, (float)FLAGS_alpha_pose, (float)FLAGS_alpha_heatmap,
+        FLAGS_part_to_show, FLAGS_model_folder, heatMapTypes, heatMapScale, FLAGS_part_candidates,
+        (float)FLAGS_render_threshold, FLAGS_number_people_max, enableGoogleLogging};
 
     // Initializing the user custom classes
     // Frames producer (e.g. video, webcam, ...)
@@ -105,7 +101,7 @@ int main (int argc, char** argv){
 
 
     // Configure wrapper
-    opWrapper.configure(wrapperStructPose, op::WrapperStructFace{}, op::WrapperStructHand{}, op::WrapperStructInput{},
+    opWrapper.configure(wrapperStructPose, op::WrapperStructInput{},
                         op::WrapperStructOutput{});
 
 
