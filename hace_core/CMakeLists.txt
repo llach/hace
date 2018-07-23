@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
         visualization_msgs
         sensor_msgs
         hace_msgs
+	roslaunch
         )
 
 ## System dependencies are found with CMake's conventions
@@ -34,6 +35,12 @@ catkin_package(
         INCLUDE_DIRS include
         CATKIN_DEPENDS roscpp cv_bridge
 )
+
+##################
+## launch files ##
+##################
+
+roslaunch_add_file_check(launch)
 
 ###########
 ## Build ##
