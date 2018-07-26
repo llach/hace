@@ -76,10 +76,10 @@ namespace op
         try
         {
             // Get frame
-            cv::Mat cvMat = cv_convert::matFromImage(*image);
+            cv::Mat cvMat;// = cv_convert::matFromImage(*image);
 
             // convert to bgr TODO automatically select correct conversion instead of hardcoding
-            cv::cvtColor(cvMat, cvMat, cv::COLOR_RGB2BGR);
+            //cv::cvtColor(cvMat, cvMat, cv::COLOR_RGB2BGR);
 
             // Move to buffer
             if (!cvMat.empty())

@@ -23,7 +23,7 @@ namespace op {
                 // only publish if we got subscribers
                 if (image_pub_.getNumSubscribers() > 0){
                     // do costly conversion and publish
-                    sensor_msgs::Image ros_image = cv_convert::imageFromMat(datumsPtr->at(0).cvOutputData);
+                    sensor_msgs::Image ros_image;//TODO = cv_convert::imageFromMat(datumsPtr->at(0).cvOutputData);
 
                     // TODO set correct frame id
                     image_pub_.publish(ros_image);

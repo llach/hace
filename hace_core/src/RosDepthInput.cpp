@@ -42,20 +42,21 @@ namespace op {
     }
 
     void RosDepthInput::rgbCallback(const sensor_msgs::Image::ConstPtr& image)
-    {
+    {   cv_bridge::CvImagePtr cv_ptr;
         try
         {
             // Get frame
-            cv::Mat cvMat = cv_convert::matFromImage(*image);
+            //cv::Mat cvMat = cv_convert::matFromImage(*image);
+            cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::RGB8);
 
             // convert to bgr TODO automatically select correct conversion instead of hardcoding
-            cv::cvtColor(cvMat, cvMat, cv::COLOR_RGB2BGR);
+            //cv::cvtColor(cvMat, cvMat, cv::COLOR_RGB2BGR);
 
             // Move to buffer
-            if (!cvMat.empty())
+            if (!cv_ptr->image.empty())
             {
                 const std::lock_guard<std::mutex> lock{rgbBufferMutex_};
-                std::swap(rgbBuffer_, cvMat);
+                std::swap(rgbBuffer_, cv_ptr->image);
             }
         }
         catch (const std::exception& e)
@@ -66,16 +67,22 @@ namespace op {
 
     void RosDepthInput::depthCallback(const sensor_msgs::Image::ConstPtr& image)
     {
+        cv_bridge::CvImagePtr cv_ptr;
         try
         {
+            cv::Mat depth_mat;
             // Get frame
-            cv::Mat cvMat = cv_convert::matFromImage(*image);
+            //cv::Mat cvMat;// = cv_convert::matFromImage(*image);
+            cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::TYPE_16UC1);
+            //cv::cvtColor(cvMat, cvMat, cv::COLOR_RGB2BGR);
 
+            cv_ptr->image.convertTo(depth_mat, CV_32F, 0.001);
+            
             // Move to buffer
-            if (!cvMat.empty())
+            if (!cv_ptr->image.empty())
             {
                 const std::lock_guard<std::mutex> lock{depthBufferMutex_};
-                std::swap(depthBuffer_, cvMat);
+                std::swap(depthBuffer_, depth_mat);
             }
         }
         catch (const std::exception& e)

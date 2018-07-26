@@ -13,7 +13,6 @@
 #include "hace_msgs/MinimalHumans.h"
 #include "hace_msgs/HaceDebug.h"
 
-#include "cv_convert.h"
 #include "DepthDatum.h"
 
 namespace op
@@ -27,7 +26,7 @@ namespace op
                    const std::string& people_topic,
                    const std::string& marker_topic,
                    const std::string& camera_info_topic,
-                   float min_depth = 0.6,
+                   float min_depth = 0.2,
                    float human_thresh = 100);
 
     void processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image);

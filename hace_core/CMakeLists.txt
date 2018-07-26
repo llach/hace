@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
         sensor_msgs
         hace_msgs
 	roslaunch
+	cv_bridge
         )
 
 ## System dependencies are found with CMake's conventions
@@ -56,7 +57,6 @@ include_directories(
 
 add_executable(${PROJECT_NAME} src/hace.cpp
 
-        include/cv_convert.h
         include/RosWorkerOutput.h
         include/RosImageProducer.h
         include/RosDepthInput.h
@@ -65,7 +65,6 @@ add_executable(${PROJECT_NAME} src/hace.cpp
         include/HumanProcessor.h
 
 
-        src/cv_convert.cpp
         src/RosWorkerOutput.cpp
         src/RosDepthInput.cpp
         src/RosDepthOutput.cpp

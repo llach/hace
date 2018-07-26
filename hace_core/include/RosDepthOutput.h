@@ -9,7 +9,6 @@
 #include "hace_msgs/MinimalHumans.h"
 #include "hace_msgs/HaceDebug.h"
 
-#include "cv_convert.h"
 #include "DepthDatum.h"
 #include "HumanProcessor.h"
 

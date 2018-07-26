@@ -4,7 +4,6 @@
 // OpenPose dependencies
 #include <openpose/headers.hpp>
 
-#include "cv_convert.h"
 
 namespace op
 {

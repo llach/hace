@@ -5,7 +5,7 @@
 #include <openpose/headers.hpp>
 
 #include "DepthDatum.h"
-#include "cv_convert.h"
+#include <cv_bridge/cv_bridge.h>
 
 namespace op
 {
