@@ -52,28 +52,31 @@ namespace op {
             hace_msgs::MinimalHuman human;
             human.uuid = uuids[person];
 
-            human.face.header.frame_id = camera_frame_;
-            keypointToPose(human.face.pose, keypoints, depth_image, person, 1);
+            human.header.frame_id = camera_frame_;
+            human.header.stamp = ros::Time::now();
+            
+            keypointToPose(human.torso, keypoints, depth_image, person, 1);
+            keypointToPose(human.face, keypoints, depth_image, person, 0);
+            keypointToPose(human.left_hand, keypoints, depth_image, person, 7);
+            keypointToPose(human.right_hand, keypoints, depth_image, person, 4);
 
-            human.lhand.header.frame_id = camera_frame_;
-            keypointToPose(human.lhand.pose, keypoints, depth_image, person, 7);
-
-            human.rhand.header.frame_id = camera_frame_;
-            keypointToPose(human.rhand.pose, keypoints, depth_image, person, 4);
-
-            if(!checkPoseNan(human.face.pose)){
-                std::cout << "got face" << human.face.pose << std::endl;
-                visual_tools_->publishSphere(human.face.pose, rviz_visual_tools::RED, rviz_visual_tools::scales::XXXLARGE);
+            if(!checkPoseNan(human.torso)){
+                visual_tools_->publishSphere(human.torso, rviz_visual_tools::RED, rviz_visual_tools::scales::XXXLARGE);
+                marker_count++;
+            }
+            
+            if(!checkPoseNan(human.face)){
+                visual_tools_->publishSphere(human.face, rviz_visual_tools::RED, rviz_visual_tools::scales::XLARGE);
                 marker_count++;
             }
 
-            if(!checkPoseNan(human.lhand.pose)){
-                visual_tools_->publishSphere(human.lhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
+            if(!checkPoseNan(human.left_hand)){
+                visual_tools_->publishSphere(human.left_hand, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
                 marker_count++;
             }
 
-            if(!checkPoseNan(human.rhand.pose)){
-                visual_tools_->publishSphere(human.rhand.pose, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
+            if(!checkPoseNan(human.right_hand)){
+                visual_tools_->publishSphere(human.right_hand, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
                 marker_count++;
             }
 
@@ -107,17 +110,16 @@ namespace op {
         if (image_pub_.getNumSubscribers() > 0){
             // do costly conversion and publish
             
-cv_bridge::CvImage img_bridge;
-sensor_msgs::Image img_msg; // >> message to be sent
+            cv_bridge::CvImage img_bridge;
+            sensor_msgs::Image img_msg; // >> message to be sent
 
-std_msgs::Header header; // empty header
-//header.seq = counter; // TODO: user defined counter
-header.stamp = ros::Time::now(); // time
+            std_msgs::Header header; // empty header
+            //header.seq = counter; // TODO: user defined counter
+            header.stamp = ros::Time::now(); // time
             header.frame_id = camera_frame_;
 
-img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, image);
-img_bridge.toImageMsg(img_msg);
-            
+            img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::RGB8, image);
+            img_bridge.toImageMsg(img_msg);
             
 
             image_pub_.publish(img_msg);
@@ -228,7 +230,7 @@ img_bridge.toImageMsg(img_msg);
 
 
     bool HumanProcessor::checkHumanNan(const hace_msgs::MinimalHuman& human){
-        return checkPoseNan(human.face.pose) && checkPoseNan(human.lhand.pose) && checkPoseNan(human.rhand.pose);
+        return checkPoseNan(human.face) && checkPoseNan(human.left_hand) && checkPoseNan(human.right_hand);
     }
 
     bool HumanProcessor::checkPoseNan(const geometry_msgs::Pose& pose){
@@ -273,8 +275,6 @@ img_bridge.toImageMsg(img_msg);
         for(int i = -radius; i <= radius; i++){
             for(int j = -radius; j <= radius; j++) {
                 float vi = image.at<float>(std::min(std::max(0,y+j), image.rows-1), std::min(std::max(0, x+i), image.cols-1));
-                std::cout << vi << ", ";
-
                 if(std::isinf(vi) || std::isnan(vi)) {
                     continue;
                 }
@@ -282,7 +282,6 @@ img_bridge.toImageMsg(img_msg);
                 v.push_back(vi);
             }
         }
-        std::cout << std::endl;
 
         if(v.empty()) {
             return std::numeric_limits<float>::quiet_NaN();
@@ -324,11 +323,7 @@ img_bridge.toImageMsg(img_msg);
 
         float z = getValueAroundPoint(depth_image, pixel_x, pixel_y);
         
-                    std::cout << "x, y" << pixel_x << ", " << pixel_y << std::endl;
-
-
         if(pixel_x == 0.0 || pixel_y == 0.0 || std::isnan(z)){
-            std::cout << "oh no" << std::endl;
             pose.position.x = std::numeric_limits<float>::quiet_NaN();
             pose.position.y = std::numeric_limits<float>::quiet_NaN();
             pose.position.z = std::numeric_limits<float>::quiet_NaN();
@@ -340,7 +335,6 @@ img_bridge.toImageMsg(img_msg);
             pose.position.y = kpoint3d.y;
             pose.position.z = z;
 
-            std::cout << "oh YES" << std::endl;
             pose.orientation.w = 1.0;
         }
 
