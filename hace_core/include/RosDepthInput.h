@@ -15,7 +15,8 @@ namespace op
         public:
 
             void init(const std::string& rgb_topic,
-                          const std::string& depth_topic);
+                      const std::string& depth_topic,
+		      int rotate_flag = 0);
 
             inline void initializationOnThread() {};
 
@@ -25,6 +26,7 @@ namespace op
 
             void depthCallback(const sensor_msgs::Image::ConstPtr& image);
             void rgbCallback(const sensor_msgs::Image::ConstPtr& image);
+	    void rot90(cv::Mat &matImage, int rotflag);
 
             std::string rgb_topic_;
             std::string depth_topic_;
@@ -38,6 +40,7 @@ namespace op
             std::shared_ptr<ros::Subscriber> rgbsub_ptr_;
             std::shared_ptr<ros::Subscriber> depthsub_ptr_;
 
+	    int rotate_flag_;
 
     };
 }
