@@ -26,6 +26,8 @@ int main (int argc, char** argv){
     spinner.start();
 
     std::string rgb_topic, depth_topic, output_topic, people_topic, rgb_info_topic, marker_topic, models;
+    int rotate_flag;
+    float min_depth;
 
     n.param("rgb_topic", rgb_topic, std::string("/people_camera/rgb/image_raw"));
     n.param("rgb_info_topic", rgb_info_topic, std::string("/people_camera/rgb/camera_info"));
@@ -34,6 +36,8 @@ int main (int argc, char** argv){
     n.param("people_topic", people_topic, std::string("/hace/people"));
     n.param("marker_topic", marker_topic, std::string("/hace/marker"));
     n.param("models", models, std::string("./models/"));
+    n.param("rotate", rotate_flag, 0);
+    n.param("min_depth", min_depth, 40.0F);
 
     // logging_level
     op::check(0 <= FLAGS_logging_level && FLAGS_logging_level <= 255, "Wrong logging_level value.",
@@ -81,14 +85,14 @@ int main (int argc, char** argv){
     // Initializing the user custom classes
     // Frames producer (e.g. video, webcam, ...)
     auto rosInput = std::make_shared<op::RosDepthInput>();
-    rosInput->init(rgb_topic, depth_topic);
+    rosInput->init(rgb_topic, depth_topic, rotate_flag);
 
     // Add custom processing
     const auto workerInputOnNewThread = true;
     opWrapper.setWorkerInput(rosInput, workerInputOnNewThread);
 
     // Output Processor
-    std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic);
+    std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic, min_depth);
     hp->setDebug();
 
     // Initializing ros output
