@@ -92,7 +92,7 @@ int main (int argc, char** argv){
     opWrapper.setWorkerInput(rosInput, workerInputOnNewThread);
 
     // Output Processor
-    std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic, min_depth);
+    std::shared_ptr<op::HumanProcessor> hp = std::make_shared<op::HumanProcessor>(output_topic, people_topic, marker_topic, rgb_info_topic, min_depth, 100, rotate_flag); //TODO: read human_thresh
     hp->setDebug();
 
     // Initializing ros output

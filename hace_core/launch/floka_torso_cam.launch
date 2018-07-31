@@ -7,6 +7,6 @@
 	    <param name="rgb_info_topic" value="/camera/color/camera_info" />
 	    <param name="depth_topic" value="/camera/aligned_depth_to_color/image_raw" />
 	    <param name="rotate" value="1" />
-	    <param name="min_depth" value="10" />
+	    <param name="min_depth" value="0.2" />
 	</node>
 </launch>

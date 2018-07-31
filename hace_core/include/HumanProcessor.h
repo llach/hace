@@ -27,7 +27,8 @@ namespace op
                    const std::string& marker_topic,
                    const std::string& camera_info_topic,
                    float min_depth = 0.2,
-                   float human_thresh = 100);
+                   float human_thresh = 100,
+                   int rotate_flag=0);
 
     void processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image);
 
@@ -82,6 +83,8 @@ namespace op
 
         // For visualizing things in rviz
         rviz_visual_tools::RvizVisualToolsPtr visual_tools_;
+        
+        int rotate_flag_=0;
 
     template <typename T>
     T median(std::vector<T> v){

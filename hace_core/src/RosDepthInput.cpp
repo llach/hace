@@ -85,9 +85,9 @@ namespace op {
 
             cv_ptr->image.convertTo(depth_mat, CV_32F, 0.001);
             
-	    if (rotate_flag_ != 0){
-		rot90(cv_ptr->image, rotate_flag_);
-	    }
+	    //if (rotate_flag_ != 0){
+	//	rot90(cv_ptr->image, rotate_flag_);
+	//    }
 
             // Move to buffer
             if (!cv_ptr->image.empty())

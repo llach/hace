@@ -7,7 +7,7 @@ namespace op {
                                    const std::string& people_topic,
                                    const std::string& marker_topic,
                                    const std::string& camera_info_topic,
-                                   float min_depth, float human_thresh) {
+                                   float min_depth, float human_thresh, int rotate_flag) {
         ros::NodeHandle n("~");
 
         output_topic_ = output_topic;
@@ -29,6 +29,8 @@ namespace op {
 
         id_counter_ = 0;
         human_thresh_ = human_thresh;
+        
+        rotate_flag_ = rotate_flag;
     }
 
     void HumanProcessor::processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image)
@@ -142,7 +144,7 @@ namespace op {
                     dist_mat[i][j] = distHuman(prev_keypoints_, keypoints, i, j);
                 }
             }
-
+            
             // new uuids
             for(int o = 0; o < keypoints.getSize(0); o++){
 
@@ -278,18 +280,19 @@ namespace op {
                 if(std::isinf(vi) || std::isnan(vi)) {
                     continue;
                 }
-
                 v.push_back(vi);
             }
         }
-
         if(v.empty()) {
             return std::numeric_limits<float>::quiet_NaN();
         }
 
         float med = median(v);
+        
 
         if(med < min_depth_) {
+            ROS_DEBUG("mindepth rejection %f < %f", med, min_depth_);
+
             return std::numeric_limits<float>::quiet_NaN();
         } else {
             return med;
@@ -317,17 +320,28 @@ namespace op {
 
     void HumanProcessor::keypointToPose(geometry_msgs::Pose& pose, const op::Array<float>& keypoints,
                                         cv::Mat& depth_image, int pind, int kind){
-
-        int pixel_x = keypoints[{pind, kind, 0}];
-        int pixel_y = keypoints[{pind, kind, 1}];
+        int pixel_x;
+        int pixel_y;
+        
+        if(rotate_flag_==0) {
+            pixel_x = keypoints[{pind, kind, 0}];
+            pixel_y = keypoints[{pind, kind, 1}];
+        } else {//if(rotate_flag==1) {
+            pixel_y = 480-keypoints[{pind, kind, 0}];//TODO: read flipping from config
+            pixel_x = keypoints[{pind, kind, 1}];
+        }
 
         float z = getValueAroundPoint(depth_image, pixel_x, pixel_y);
         
         if(pixel_x == 0.0 || pixel_y == 0.0 || std::isnan(z)){
+            ROS_DEBUG("broken coordinates xyz: %d, %d, %f", pixel_x,pixel_y, z);
+
             pose.position.x = std::numeric_limits<float>::quiet_NaN();
             pose.position.y = std::numeric_limits<float>::quiet_NaN();
             pose.position.z = std::numeric_limits<float>::quiet_NaN();
         } else {
+            ROS_DEBUG("good   coordinates xyz: %d, %d, %f", pixel_x,pixel_y, z);
+
             cv::Point2d kpoint(pixel_x, pixel_y);
             cv::Point3d kpoint3d = camera_model_.projectPixelTo3dRay(camera_model_.rectifyPoint(kpoint));
 
