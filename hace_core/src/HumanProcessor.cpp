@@ -33,7 +33,7 @@ namespace op {
         rotate_flag_ = rotate_flag;
     }
 
-    void HumanProcessor::processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image)
+    void HumanProcessor::processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image, ros::Time image_time)
     {
         if(!got_camera_info_) return;
 
@@ -55,7 +55,7 @@ namespace op {
             human.uuid = uuids[person];
 
             human.header.frame_id = camera_frame_;
-            human.header.stamp = ros::Time::now();
+            human.header.stamp = image_time;
             
             keypointToPose(human.torso, keypoints, depth_image, person, 1);
             keypointToPose(human.face, keypoints, depth_image, person, 0);
@@ -125,6 +125,7 @@ namespace op {
             
 
             image_pub_.publish(img_msg);
+            std::cout << ros::Time::now()-image_time << std::endl;
         }
 
     }

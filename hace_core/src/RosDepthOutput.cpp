@@ -22,7 +22,7 @@ namespace op {
                 const auto& poseKeypoints = datum.poseKeypoints;
 
 
-                hp_ptr_->processHumans(poseKeypoints, datum.cvOutputData, depth_image);
+                hp_ptr_->processHumans(poseKeypoints, datum.cvOutputData, depth_image, datum.image_time_);
             }
         }
         catch (const std::exception& e)

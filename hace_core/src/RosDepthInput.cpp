@@ -36,6 +36,7 @@ namespace op {
         {
             const std::lock_guard<std::mutex> lock{rgbBufferMutex_};
             datum.cvInputData = rgbBuffer_;
+            datum.setImageTime(rgbBufferTime_);
         } else {
             return nullptr;
         }
@@ -64,6 +65,7 @@ namespace op {
             {
                 const std::lock_guard<std::mutex> lock{rgbBufferMutex_};
                 std::swap(rgbBuffer_, cv_ptr->image);
+                rgbBufferTime_ = image->header.stamp;
             }
         }
         catch (const std::exception& e)
@@ -73,7 +75,7 @@ namespace op {
     }
 
     void RosDepthInput::depthCallback(const sensor_msgs::Image::ConstPtr& image)
-    {
+    {      
         cv_bridge::CvImagePtr cv_ptr;
         try
         {
@@ -94,6 +96,8 @@ namespace op {
             {
                 const std::lock_guard<std::mutex> lock{depthBufferMutex_};
                 std::swap(depthBuffer_, depth_mat);
+                //depthBufferMap_[image->header.stamp]=depth_mat;
+                //std::cout << depthBufferMap_.size() << std::endl;
             }
         }
         catch (const std::exception& e)

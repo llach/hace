@@ -30,7 +30,7 @@ namespace op
                    float human_thresh = 100,
                    int rotate_flag=0);
 
-    void processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image);
+    void processHumans(Array<float> keypoints, const cv::Mat image, cv::Mat& depth_image, ros::Time image_time);
 
     void trackHumans(Array<float>& keypoints);
 

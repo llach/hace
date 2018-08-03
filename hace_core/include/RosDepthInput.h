@@ -31,9 +31,10 @@ namespace op
             std::string rgb_topic_;
             std::string depth_topic_;
 
+            ros::Time rgbBufferTime_;
             cv::Mat rgbBuffer_;
             std::mutex rgbBufferMutex_;
-
+           
             cv::Mat depthBuffer_;
             std::mutex depthBufferMutex_;
 

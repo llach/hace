@@ -15,14 +15,17 @@ namespace op
     {
         cv::Mat depth_image_;
         std::string frame_;
+        ros::Time image_time_;
 
-        DepthDatum(cv::Mat depth_image = {}, const std::string& frame = "") :
+        DepthDatum(cv::Mat depth_image = {}, const std::string& frame = "", ros::Time image_time = ros::Time()) :
                 depth_image_(depth_image),
-                frame_(frame)
+                frame_(frame),
+                image_time_(image_time)
         {}
 
         inline void setDepthImage(cv::Mat image) {depth_image_ = image;}
         inline void setFrame(const std::string& frame) {frame_ = frame;}
+        inline void setImageTime(const ros::Time image_time) {image_time_ = image_time;}
     };
 
 }
