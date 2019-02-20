@@ -81,9 +81,29 @@ namespace op {
                 visual_tools_->publishSphere(human.right_hand, rviz_visual_tools::BLACK, rviz_visual_tools::scales::XLARGE);
                 marker_count++;
             }
+            
+            if(checkPoseNan(human.face)) {
+                ROS_INFO("face nan");
+            }
+            
+            if(checkPoseNan(human.torso)) {
+                ROS_INFO("torso nan");
+            }
+            if(checkPoseNan(human.left_hand)) {
+                ROS_INFO("left nan");
+            }
+            if(checkPoseNan(human.right_hand)) {
+                ROS_INFO("right nan");
+            }
 
-            if(!checkHumanNan(human)) humans.humans.push_back(human);
-
+            ROS_INFO("======================");
+            if(!checkHumanNan(human)) {
+                ROS_INFO("found valid human!");
+                humans.humans.push_back(human);
+            } else {
+                ROS_INFO("Human was NaN!");
+            }
+            
             cv::putText(image, human.uuid, getHighestPoint(keypoints, person), cv::FONT_HERSHEY_DUPLEX,
                         1.6,  cvScalar(213, 38, 181));
 
@@ -125,7 +145,7 @@ namespace op {
             
 
             image_pub_.publish(img_msg);
-            std::cout << ros::Time::now()-image_time << std::endl;
+            //std::cout << ros::Time::now()-image_time << std::endl;
         }
 
     }
@@ -292,7 +312,7 @@ namespace op {
         
 
         if(med < min_depth_) {
-            ROS_DEBUG("mindepth rejection %f < %f", med, min_depth_);
+            ROS_INFO("mindepth rejection %f < %f", med, min_depth_);
 
             return std::numeric_limits<float>::quiet_NaN();
         } else {
@@ -344,10 +364,11 @@ namespace op {
             ROS_DEBUG("good   coordinates xyz: %d, %d, %f", pixel_x,pixel_y, z);
 
             cv::Point2d kpoint(pixel_x, pixel_y);
-            cv::Point3d kpoint3d = camera_model_.projectPixelTo3dRay(camera_model_.rectifyPoint(kpoint));
 
-            pose.position.x = kpoint3d.x;
-            pose.position.y = kpoint3d.y;
+            cv::Point3d kpoint3d = camera_model_.projectPixelTo3dRay(kpoint);
+
+            pose.position.x = kpoint3d.x * z;
+            pose.position.y = kpoint3d.y * z;
             pose.position.z = z;
 
             pose.orientation.w = 1.0;
